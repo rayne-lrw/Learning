@@ -108,7 +108,7 @@
   .cat-item:hover { background: var(--surface-2); }
   .cat-item.on { background: var(--accent-soft); color: var(--accent); font-weight: 700; border-left-color: var(--accent); }
   .cat-item.on .n { color: var(--accent); }
-  .cat-item.all { margin-bottom: 6px; }
+  .cat-item.all { margin-bottom: 2px; }
   .backdrop { display: none; }
 
   /* 內容 */
@@ -142,6 +142,15 @@
     transform: rotate(-45deg); transition: transform .2s;
   }
   .card[open] .arrow { transform: rotate(45deg); }
+  .fav-btn {
+    flex: none; border: none; background: none; cursor: pointer;
+    width: 32px; height: 32px; margin: -2px -4px 0 0; border-radius: 8px;
+    font-size: 20px; line-height: 1; color: var(--muted);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  @media (hover: hover) { .fav-btn:hover { background: var(--surface-2); color: var(--accent); } }
+  .fav-btn.on { color: var(--accent); }
+  .cat-item.fav-item { margin-bottom: 6px; }
   .body { padding: 0 18px 16px; border-top: 1px dashed var(--border); }
   .part h3 {
     font-size: 13px; letter-spacing: .08em; color: var(--accent);
@@ -250,7 +259,26 @@
     ['howto', '怎麼用']
   ];
 
-  var state = { categories: [], all: [], byId: {}, cat: 'all', q: '' };
+  var state = { categories: [], all: [], byId: {}, cat: 'all', q: '', fav: loadFav() };
+
+  /* ---------- 收藏（只存在這個瀏覽器的 localStorage） ---------- */
+  function loadFav() {
+    try {
+      var arr = JSON.parse(localStorage.getItem('favorites') || '[]');
+      return new Set(Array.isArray(arr) ? arr : []);
+    } catch (e) { return new Set(); }
+  }
+  function saveFav() {
+    try { localStorage.setItem('favorites', JSON.stringify(Array.from(state.fav))); } catch (e) {}
+  }
+  function favCount() {
+    var n = 0;
+    state.fav.forEach(function (id) { if (state.byId[id]) n++; });
+    return n;
+  }
+  function inView(c) {
+    return state.cat === 'all' || (state.cat === 'fav' ? state.fav.has(c.id) : c.cat === state.cat);
+  }
   var $ = function (id) { return document.getElementById(id); };
 
   /* ---------- 主題 ---------- */
@@ -363,7 +391,8 @@
   /* ---------- 畫面 ---------- */
   function renderChips() {
     var html = '<button class="cat-item all' + (state.cat === 'all' ? ' on' : '') + '" data-cat="all"><span class="label">全部</span><span class="n">' + state.all.length + '</span></button>';
-    var cur = '全部';
+    html += '<button class="cat-item fav-item' + (state.cat === 'fav' ? ' on' : '') + '" data-cat="fav"><span class="label">★ 我的收藏</span><span class="n">' + favCount() + '</span></button>';
+    var cur = state.cat === 'fav' ? '★ 收藏' : '全部';
     state.categories.forEach(function (c) {
       if (state.cat === c.id) cur = c.name;
       html += '<button class="cat-item' + (state.cat === c.id ? ' on' : '') + '" data-cat="' + c.id + '" title="' + esc(c.description || '') + '"><span class="label">' + esc(c.name) + '</span><span class="n">' + c.items.length + '</span></button>';
@@ -386,6 +415,7 @@
       '<summary><div class="t"><div><span class="name">' + highlight(esc(c.name), q) + '</span>' +
       '<span class="en">' + highlight(esc(c.en || ''), q) + '</span></div>' +
       '<div class="gist">' + highlight(esc(gist(c)), q) + '</div></div>' +
+      favBtnHTML(c.id) +
       '<span class="arrow"></span></summary>' +
       '<div class="body">' + body +
       '<div class="card-foot"><span class="tag">' + esc(c.catName) + '</span>' +
@@ -393,19 +423,25 @@
       '</div></details>';
   }
 
+  function favBtnHTML(id) {
+    var on = state.fav.has(id);
+    return '<button class="fav-btn' + (on ? ' on' : '') + '" data-fav="' + id + '" aria-pressed="' + on + '" title="' + (on ? '取消收藏' : '收藏') + '">' + (on ? '★' : '☆') + '</button>';
+  }
+
   function render() {
     var q = state.q.trim();
     var html = '', count = 0;
     state.categories.forEach(function (cat) {
-      if (state.cat !== 'all' && state.cat !== cat.id) return;
-      var items = cat.items.filter(function (c) { return matches(c, q); });
+      var items = cat.items.filter(function (c) { return inView(c) && matches(c, q); });
       if (!items.length) return;
       count += items.length;
       html += '<section class="section"><h2>' + esc(cat.name) + '</h2>' +
         (cat.description ? '<p class="desc">' + esc(cat.description) + '</p>' : '') +
         items.map(function (c) { return cardHTML(c, q); }).join('') + '</section>';
     });
-    $('list').innerHTML = html || '<div class="empty">找不到符合「' + esc(q) + '」的概念。</div>';
+    var empty = q ? '找不到符合「' + esc(q) + '」的概念。'
+      : (state.cat === 'fav' ? '還沒有收藏。點卡片右上角的 ☆ 就能收藏。<br>收藏只存在這個瀏覽器，清除網站資料後就會消失。' : '這個分類還沒有概念。');
+    $('list').innerHTML = html || '<div class="empty">' + empty + '</div>';
     $('status').textContent = q ? '找到 ' + count + ' 個結果' : '';
     // 搜尋時自動展開結果較少的卡片
     if (q && count <= 5) document.querySelectorAll('.card').forEach(function (d) { d.open = true; });
@@ -482,7 +518,7 @@
   });
 
   $('randomBtn').addEventListener('click', function () {
-    var pool = state.cat === 'all' ? state.all : state.all.filter(function (c) { return c.cat === state.cat; });
+    var pool = state.all.filter(inView);
     if (!pool.length) return;
     var c = pool[Math.floor(Math.random() * pool.length)];
     document.querySelectorAll('.card[open]').forEach(function (d) { d.open = false; });
@@ -491,6 +527,17 @@
   });
 
   $('list').addEventListener('click', function (e) {
+    var fb = e.target.closest('.fav-btn');
+    if (fb) {
+      e.preventDefault(); // 不要順便展開或收合卡片
+      var id = fb.getAttribute('data-fav');
+      if (state.fav.has(id)) state.fav.delete(id); else state.fav.add(id);
+      saveFav();
+      renderChips();
+      if (state.cat === 'fav' && !state.fav.has(id)) { render(); return; }
+      fb.outerHTML = favBtnHTML(id);
+      return;
+    }
     var ref = e.target.closest('a.ref');
     if (ref) {
       e.preventDefault();

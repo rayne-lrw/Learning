@@ -1,0 +1,70 @@
+{
+  "categories": [
+    {
+      "id": "game",
+      "name": "賽局與策略",
+      "description": "互動中的選擇與誘因",
+      "file": "game.json"
+    },
+    {
+      "id": "decision",
+      "name": "決策與風險",
+      "description": "怎麼做出更好的選擇",
+      "file": "decision.json"
+    },
+    {
+      "id": "thinking",
+      "name": "思考工具",
+      "description": "拆解問題的方法",
+      "file": "thinking.json"
+    },
+    {
+      "id": "growth",
+      "name": "成長與時間",
+      "description": "累積、學習與時間的力量",
+      "file": "growth.json"
+    },
+    {
+      "id": "bias",
+      "name": "認知偏誤",
+      "description": "大腦常見的判斷錯誤",
+      "file": "bias.json"
+    },
+    {
+      "id": "psych",
+      "name": "心理與人際",
+      "description": "動機、群體與人際互動",
+      "file": "psych.json"
+    },
+    {
+      "id": "stats",
+      "name": "統計與機率",
+      "description": "看懂數據與隨機性",
+      "file": "stats.json"
+    },
+    {
+      "id": "econ",
+      "name": "經濟與誘因",
+      "description": "資源、市場與人的動機",
+      "file": "econ.json"
+    },
+    {
+      "id": "system",
+      "name": "系統與社會",
+      "description": "複雜系統的反直覺現象",
+      "file": "system.json"
+    },
+    {
+      "id": "work",
+      "name": "工作與組織",
+      "description": "團隊與組織運作的規律",
+      "file": "work.json"
+    },
+    {
+      "id": "life",
+      "name": "哲學與人生",
+      "description": "關於公平、自我與人生",
+      "file": "life.json"
+    }
+  ]
+}

@@ -1,1 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>思維模型筆記</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%A7%A0%3C/text%3E%3C/svg%3E">
+<meta name="description" content="能帶來啟發的思維模型、法則與效應，附解析與例子。">
+<script>
+  // 在畫面繪製前套用主題，避免閃爍
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('theme'); } catch (e) {}
+    if (t !== 'light' && t !== 'dark') {
+      t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<style>
+  :root {
+    --bg: #f7f5f0;
+    --surface: #ffffff;
+    --surface-2: #f0ede6;
+    --text: #22201c;
+    --muted: #6b665c;
+    --border: #e2ddd2;
+    --accent: #b4532a;
+    --accent-soft: #f6e4da;
+    --mark: #fbe7a1;
+    --shadow: 0 1px 2px rgba(40, 30, 10, .06), 0 2px 8px rgba(40, 30, 10, .04);
+  }
+  [data-theme="dark"] {
+    --bg: #15171a;
+    --surface: #1d2024;
+    --surface-2: #262a30;
+    --text: #e8e6e1;
+    --muted: #9b9890;
+    --border: #2f343b;
+    --accent: #e8875a;
+    --accent-soft: #3a2a22;
+    --mark: #5a4a1a;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    transition: background .2s, color .2s;
+  }
+  a { color: var(--accent); }
+  button { font: inherit; color: inherit; }
 
+  /* 頂部 */
+  header.top {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 20px; }
+  .bar { display: flex; align-items: center; gap: 12px; padding: 14px 0 10px; }
+  .brand { flex: 1; min-width: 0; }
+  .brand h1 { margin: 0; font-size: 20px; letter-spacing: .02em; }
+  .brand .sub { color: var(--muted); font-size: 13px; }
+  .icon-btn {
+    border: 1px solid var(--border); background: var(--surface);
+    border-radius: 999px; height: 36px; padding: 0 14px;
+    cursor: pointer; white-space: nowrap; font-size: 14px;
+  }
+  .icon-btn:hover { border-color: var(--accent); }
+  .search-row { display: flex; gap: 8px; padding-bottom: 10px; }
+  .search {
+    flex: 1; height: 40px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--surface);
+    padding: 0 14px; font: inherit; color: var(--text); outline: none;
+  }
+  .search:focus { border-color: var(--accent); }
+  .chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 12px; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: none; border: 1px solid var(--border); background: var(--surface);
+    border-radius: 999px; padding: 4px 12px; font-size: 14px; cursor: pointer;
+  }
+  .chip .n { color: var(--muted); font-size: 12px; margin-left: 4px; }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .chip.on .n { color: rgba(255,255,255,.8); }
+
+  /* 內容 */
+  main { padding: 20px 0 80px; }
+  .status { color: var(--muted); font-size: 14px; margin: 0 0 8px; }
+  .section h2 { font-size: 18px; margin: 28px 0 2px; }
+  .section .desc { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; margin-bottom: 10px; box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .card.flash { animation: flash 1.4s ease; }
+  @keyframes flash { 0%, 40% { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); } }
+  .card summary {
+    list-style: none; cursor: pointer; padding: 14px 18px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .card summary::-webkit-details-marker { display: none; }
+  .card summary .t { flex: 1; min-width: 0; }
+  .card .name { font-weight: 700; font-size: 17px; }
+  .card .en { color: var(--muted); font-size: 13px; margin-left: 8px; font-weight: 400; }
+  .card .gist {
+    color: var(--muted); font-size: 14px; margin-top: 2px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .card[open] .gist { display: none; }
+  .card .arrow {
+    flex: none; width: 9px; height: 9px; margin-top: 10px; margin-right: 4px;
+    border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
+    transform: rotate(-45deg); transition: transform .2s;
+  }
+  .card[open] .arrow { transform: rotate(45deg); }
+  .body { padding: 0 18px 16px; border-top: 1px dashed var(--border); }
+  .part h3 {
+    font-size: 13px; letter-spacing: .08em; color: var(--accent);
+    margin: 16px 0 4px; font-weight: 700;
+  }
+  .part p { margin: 0 0 8px; }
+  .part ul { margin: 0 0 8px; padding-left: 1.2em; }
+  .part li { margin-bottom: 4px; }
+  .card-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 13px; color: var(--muted); }
+  .tag { background: var(--surface-2); border-radius: 6px; padding: 1px 8px; }
+  .copy { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 13px; padding: 0; }
+  .copy:hover { color: var(--accent); }
+  a.ref { text-decoration: none; border-bottom: 1px dotted var(--accent); }
+  mark { background: var(--mark); color: inherit; border-radius: 2px; }
+  .empty, .error {
+    text-align: center; color: var(--muted); padding: 60px 20px;
+  }
+  .error code { background: var(--surface-2); padding: 2px 6px; border-radius: 4px; }
+  footer { color: var(--muted); font-size: 13px; text-align: center; padding: 20px 0 40px; }
+
+  @media (max-width: 560px) {
+    .brand .sub { display: none; }
+    .icon-btn { padding: 0 10px; font-size: 13px; }
+    .wrap { padding: 0 14px; }
+    .card .en { display: block; margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="bar">
+      <div class="brand">
+        <h1>思維模型筆記</h1>
+        <div class="sub" id="sub">載入中…</div>
+      </div>
+      <button class="icon-btn" id="randomBtn" title="隨機抽一個概念">🎲 隨機</button>
+      <button class="icon-btn" id="themeBtn" title="切換深淺色模式">🌙</button>
+    </div>
+    <div class="search-row">
+      <input class="search" id="search" type="search" placeholder="搜尋名稱、英文或內容…" autocomplete="off">
+      <button class="icon-btn" id="toggleAll">全部展開</button>
+    </div>
+    <nav class="chips" id="chips"></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="status" id="status"></p>
+  <div id="list"></div>
+</main>
+
+<footer class="wrap">資料位於 <code>data/</code> 資料夾，每個分類一個 JSON 檔。</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var SECTIONS = [
+    ['what', '它是什麼'],
+    ['example', '例子'],
+    ['why', '為什麼重要'],
+    ['howto', '怎麼用']
+  ];
+
+  var state = { categories: [], all: [], byId: {}, cat: 'all', q: '' };
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------- 主題 ---------- */
+  function applyThemeIcon() {
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    $('themeBtn').textContent = dark ? '☀️' : '🌙';
+    $('themeBtn').title = dark ? '切換為淺色模式' : '切換為深色模式';
+  }
+  $('themeBtn').addEventListener('click', function () {
+    var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+    applyThemeIcon();
+  });
+  applyThemeIcon();
+
+  /* ---------- 工具 ---------- */
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function baseName(n) { return n.replace(/（.*?）/g, '').trim(); }
+
+  // 名稱對照表：用來把文中「某概念」自動連到該卡片
+  var nameMap = {};
+  function buildNameMap() {
+    state.all.forEach(function (c) {
+      nameMap[c.name] = c.id;
+      nameMap[baseName(c.name)] = c.id;
+      var m = c.name.match(/（(.*?)）/);
+      if (m) nameMap[m[1]] = c.id;
+    });
+  }
+
+  // 把一段字串轉成 HTML：以「- 」開頭的行變清單，其餘變段落
+  function renderText(text, selfId, q) {
+    var lines = String(text).split('\n');
+    var html = '', inList = false;
+    lines.forEach(function (line) {
+      var isItem = /^\s*-\s+/.test(line);
+      var content = inline(line.replace(/^\s*-\s+/, ''), selfId, q);
+      if (isItem) {
+        if (!inList) { html += '<ul>'; inList = true; }
+        html += '<li>' + content + '</li>';
+      } else {
+        if (inList) { html += '</ul>'; inList = false; }
+        if (line.trim()) html += '<p>' + content + '</p>';
+      }
+    });
+    if (inList) html += '</ul>';
+    return html;
+  }
+
+  function inline(s, selfId, q) {
+    var out = esc(s);
+    out = out.replace(/「([^「」]+)」/g, function (m, inner) {
+      var id = nameMap[inner];
+      if (id && id !== selfId) return '「<a class="ref" href="#' + id + '" data-ref="' + id + '">' + inner + '</a>」';
+      return m;
+    });
+    return highlight(out, q);
+  }
+
+  function highlight(html, q) {
+    if (!q) return html;
+    var re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    // 只替換標籤之外的文字
+    return html.replace(/(<[^>]+>)|([^<]+)/g, function (m, tag, txt) {
+      return tag ? tag : txt.replace(re, '<mark>$1</mark>');
+    });
+  }
+
+  function gist(c) {
+    var first = c.what.split('\n')[0];
+    return first.replace(/^\s*-\s+/, '');
+  }
+
+  /* ---------- 載入資料 ---------- */
+  function load() {
+    fetch('data/categories.json', { cache: 'no-cache' })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (idx) {
+        state.categories = idx.categories;
+        return Promise.all(idx.categories.map(function (cat) {
+          return fetch('data/' + cat.file, { cache: 'no-cache' })
+            .then(function (r) { if (!r.ok) throw new Error(cat.file + ' ' + r.status); return r.json(); })
+            .then(function (items) {
+              cat.items = items;
+              items.forEach(function (it) { it.cat = cat.id; it.catName = cat.name; });
+            });
+        }));
+      })
+      .then(function () {
+        state.categories.forEach(function (c) { state.all = state.all.concat(c.items); });
+        state.all.forEach(function (c) { state.byId[c.id] = c; });
+        buildNameMap();
+        $('sub').textContent = '共 ' + state.all.length + ' 個概念 · ' + state.categories.length + ' 個分類';
+        renderChips();
+        render();
+        openFromHash();
+      })
+      .catch(function (err) {
+        $('list').innerHTML = '<div class="error">資料載入失敗（' + esc(err.message) + '）。<br>' +
+          '如果你是直接用瀏覽器開啟本機檔案，請改用本機伺服器，例如在資料夾中執行 <code>python3 -m http.server</code>。</div>';
+        $('sub').textContent = '載入失敗';
+      });
+  }
+
+  /* ---------- 畫面 ---------- */
+  function renderChips() {
+    var html = '<button class="chip' + (state.cat === 'all' ? ' on' : '') + '" data-cat="all">全部<span class="n">' + state.all.length + '</span></button>';
+    state.categories.forEach(function (c) {
+      html += '<button class="chip' + (state.cat === c.id ? ' on' : '') + '" data-cat="' + c.id + '">' + esc(c.name) + '<span class="n">' + c.items.length + '</span></button>';
+    });
+    $('chips').innerHTML = html;
+  }
+
+  function matches(c, q) {
+    if (!q) return true;
+    var hay = [c.name, c.en, c.what, c.example, c.why, c.howto].join(' ').toLowerCase();
+    return hay.indexOf(q.toLowerCase()) !== -1;
+  }
+
+  function cardHTML(c, q) {
+    var body = SECTIONS.map(function (s) {
+      return '<div class="part"><h3>' + s[1] + '</h3>' + renderText(c[s[0]], c.id, q) + '</div>';
+    }).join('');
+    return '<details class="card" id="' + c.id + '">' +
+      '<summary><div class="t"><div><span class="name">' + highlight(esc(c.name), q) + '</span>' +
+      '<span class="en">' + highlight(esc(c.en || ''), q) + '</span></div>' +
+      '<div class="gist">' + highlight(esc(gist(c)), q) + '</div></div>' +
+      '<span class="arrow"></span></summary>' +
+      '<div class="body">' + body +
+      '<div class="card-foot"><span class="tag">' + esc(c.catName) + '</span>' +
+      '<button class="copy" data-copy="' + c.id + '">複製連結</button></div>' +
+      '</div></details>';
+  }
+
+  function render() {
+    var q = state.q.trim();
+    var html = '', count = 0;
+    state.categories.forEach(function (cat) {
+      if (state.cat !== 'all' && state.cat !== cat.id) return;
+      var items = cat.items.filter(function (c) { return matches(c, q); });
+      if (!items.length) return;
+      count += items.length;
+      html += '<section class="section"><h2>' + esc(cat.name) + '</h2>' +
+        (cat.description ? '<p class="desc">' + esc(cat.description) + '</p>' : '') +
+        items.map(function (c) { return cardHTML(c, q); }).join('') + '</section>';
+    });
+    $('list').innerHTML = html || '<div class="empty">找不到符合「' + esc(q) + '」的概念。</div>';
+    $('status').textContent = q ? '找到 ' + count + ' 個結果' : '';
+    // 搜尋時自動展開結果較少的卡片
+    if (q && count <= 5) document.querySelectorAll('.card').forEach(function (d) { d.open = true; });
+    updateToggleLabel();
+  }
+
+  function updateToggleLabel() {
+    var cards = document.querySelectorAll('.card');
+    var allOpen = cards.length && Array.prototype.every.call(cards, function (d) { return d.open; });
+    $('toggleAll').textContent = allOpen ? '全部收合' : '全部展開';
+  }
+
+  function focusCard(id, instant) {
+    var el = document.getElementById(id);
+    if (!el) {
+      // 不在目前篩選範圍內：清除篩選後再找
+      state.cat = 'all'; state.q = ''; $('search').value = '';
+      renderChips(); render();
+      el = document.getElementById(id);
+      if (!el) return;
+    }
+    el.open = true;
+    var headerH = document.querySelector('header.top').offsetHeight;
+    var top = el.getBoundingClientRect().top + window.pageYOffset - headerH - 12;
+    window.scrollTo({ top: top, behavior: instant ? 'auto' : 'smooth' });
+    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+    updateToggleLabel();
+  }
+
+  function openFromHash() {
+    var id = decodeURIComponent(location.hash.slice(1));
+    if (id && state.byId[id]) focusCard(id, true);
+  }
+
+  /* ---------- 事件 ---------- */
+  $('chips').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip'); if (!b) return;
+    state.cat = b.getAttribute('data-cat');
+    renderChips(); render();
+    window.scrollTo({ top: 0 });
+  });
+
+  var timer;
+  $('search').addEventListener('input', function (e) {
+    clearTimeout(timer);
+    timer = setTimeout(function () { state.q = e.target.value; render(); }, 150);
+  });
+
+  $('toggleAll').addEventListener('click', function () {
+    var cards = document.querySelectorAll('.card');
+    var allOpen = Array.prototype.every.call(cards, function (d) { return d.open; });
+    cards.forEach(function (d) { d.open = !allOpen; });
+    updateToggleLabel();
+  });
+
+  $('randomBtn').addEventListener('click', function () {
+    var pool = state.cat === 'all' ? state.all : state.all.filter(function (c) { return c.cat === state.cat; });
+    if (!pool.length) return;
+    var c = pool[Math.floor(Math.random() * pool.length)];
+    document.querySelectorAll('.card[open]').forEach(function (d) { d.open = false; });
+    history.replaceState(null, '', '#' + c.id);
+    focusCard(c.id);
+  });
+
+  $('list').addEventListener('click', function (e) {
+    var ref = e.target.closest('a.ref');
+    if (ref) {
+      e.preventDefault();
+      var id = ref.getAttribute('data-ref');
+      history.pushState(null, '', '#' + id);
+      focusCard(id);
+      return;
+    }
+    var cp = e.target.closest('.copy');
+    if (cp) {
+      var url = location.href.split('#')[0] + '#' + cp.getAttribute('data-copy');
+      var done = function () { cp.textContent = '已複製 ✓'; setTimeout(function () { cp.textContent = '複製連結'; }, 1500); };
+      if (navigator.clipboard) navigator.clipboard.writeText(url).then(done, function () { prompt('複製這個連結：', url); });
+      else prompt('複製這個連結：', url);
+    }
+  });
+
+  $('list').addEventListener('toggle', updateToggleLabel, true);
+  window.addEventListener('hashchange', openFromHash);
+
+  load();
+})();
+</script>
+</body>
+</html>

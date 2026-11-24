@@ -171,6 +171,70 @@
   .error code { background: var(--surface-2); padding: 2px 6px; border-radius: 4px; }
   footer { color: var(--muted); font-size: 13px; text-align: center; padding: 20px 0 40px; }
 
+  /* 連結面板（桌面：右側堆疊；手機：底部面板） */
+  .stack {
+    position: fixed; z-index: 20; top: var(--head-h, 120px); right: 0; bottom: 0;
+    max-width: calc(100vw - 250px);
+    display: none; flex-direction: column;
+    background: var(--bg); border-left: 1px solid var(--border);
+    box-shadow: -8px 0 28px rgba(0, 0, 0, .18);
+  }
+  .stack.open { display: flex; animation: stackIn .2s ease; }
+  @keyframes stackIn { from { transform: translateX(24px); opacity: 0; } }
+  .stack-bar {
+    flex: none; display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; border-bottom: 1px solid var(--border);
+    font-size: 13px; color: var(--muted);
+  }
+  .stack-bar .crumbs { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .stack-bar .sbtn {
+    border: 1px solid var(--border); background: var(--surface); border-radius: 999px;
+    height: 30px; padding: 0 12px; cursor: pointer; font-size: 13px; white-space: nowrap;
+  }
+  .stack-bar .sbtn:hover { border-color: var(--accent); }
+  .stack-bar .back { display: none; }
+  .stack-track { flex: 1; min-height: 0; display: flex; overflow-x: auto; overflow-y: hidden; }
+  .panel {
+    flex: none; width: 420px; height: 100%; overflow-y: auto;
+    background: var(--surface); border-right: 1px solid var(--border);
+    padding: 16px 20px 40px;
+  }
+  .panel.flash { animation: flash 1.4s ease; }
+  .panel-head { display: flex; gap: 8px; align-items: flex-start; }
+  .panel-head .t { flex: 1; min-width: 0; }
+  .panel-head .name { font-weight: 700; font-size: 18px; line-height: 1.4; }
+  .panel-head .en { color: var(--muted); font-size: 13px; }
+  .panel-head .x {
+    flex: none; border: none; background: none; cursor: pointer; color: var(--muted);
+    width: 32px; height: 32px; border-radius: 8px; font-size: 16px; margin-top: -2px;
+  }
+  .panel-head .x:hover { background: var(--surface-2); color: var(--text); }
+  .panel-meta { display: flex; gap: 12px; align-items: center; margin: 6px 0 4px; font-size: 13px; }
+  .panel-meta .goto { background: none; border: none; color: var(--accent); cursor: pointer; padding: 0; font-size: 13px; }
+  .panel-meta .goto:hover { text-decoration: underline; }
+  .spine {
+    flex: none; width: 46px; height: 100%; cursor: pointer;
+    background: var(--surface-2); border: none; border-right: 1px solid var(--border);
+    color: var(--text); font-size: 15px; font-weight: 700; line-height: 1.25;
+    padding: 16px 0; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px;
+  }
+  .spine span { display: block; }
+  .spine:hover { background: var(--accent-soft); color: var(--accent); }
+  .stack-shade { display: none; }
+
+  /* 滑鼠移到連結上的預覽小卡 */
+  .peek {
+    position: fixed; z-index: 40; width: 320px; display: none; pointer-events: none;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .18); padding: 12px 14px; font-size: 14px; line-height: 1.6;
+  }
+  .peek.show { display: block; }
+  .peek .name { font-weight: 700; font-size: 15px; }
+  .peek .en { color: var(--muted); font-size: 12px; margin-left: 6px; }
+  .peek .g { color: var(--muted); margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+  .peek .hint { color: var(--accent); font-size: 12px; margin-top: 6px; }
+
   /* 手機與窄螢幕：分類清單改成左側抽屜 */
   @media (max-width: 860px) {
     .layout { display: block; }
@@ -202,7 +266,25 @@
       transition: opacity .25s;
     }
     .backdrop.open { opacity: 1; pointer-events: auto; }
-    body.drawer-open { overflow: hidden; }
+    body.drawer-open, body.sheet-open { overflow: hidden; }
+
+    .stack {
+      top: auto; left: 0; right: 0; bottom: 0; height: 85vh; max-width: none;
+      border-left: none; border-top: 1px solid var(--border);
+      border-radius: 16px 16px 0 0; overflow: hidden; z-index: 35;
+      box-shadow: 0 -8px 28px rgba(0, 0, 0, .2);
+    }
+    @keyframes stackIn { from { transform: translateY(40px); opacity: 0; } }
+    .stack-bar .back { display: inline-block; }
+    .stack-bar .back[hidden] { display: none; }
+    .stack-track { overflow-x: hidden; }
+    .panel { width: 100%; border-right: none; padding: 14px 16px 40px; }
+    .panel:not(:last-child), .spine { display: none; }
+    .stack-shade {
+      display: block; position: fixed; inset: 0; z-index: 34;
+      background: rgba(0, 0, 0, .4); opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    .stack-shade.open { opacity: 1; pointer-events: auto; }
   }
 
   @media (max-width: 560px) {
@@ -245,6 +327,16 @@
   </main>
 </div>
 <div class="backdrop" id="backdrop"></div>
+<div class="stack-shade" id="stackShade"></div>
+<aside class="stack" id="stack" aria-label="概念面板">
+  <div class="stack-bar">
+    <button class="sbtn back" id="stackBack">← 返回</button>
+    <span class="crumbs" id="stackCrumbs"></span>
+    <button class="sbtn" id="stackClose">全部關閉</button>
+  </div>
+  <div class="stack-track" id="stackTrack"></div>
+</aside>
+<div class="peek" id="peek"></div>
 
 <footer class="wrap">資料位於 <code>data/</code> 資料夾，每個分類一個 JSON 檔。</footer>
 
@@ -259,7 +351,10 @@
     ['howto', '怎麼用']
   ];
 
-  var state = { categories: [], all: [], byId: {}, cat: 'all', q: '', fav: loadFav() };
+  var state = { categories: [], all: [], byId: {}, cat: 'all', q: '', fav: loadFav(), stack: [], start: 0 };
+  var PANEL_W = 420, SPINE_W = 46;
+  var mobileMQ = window.matchMedia('(max-width: 860px)');
+  var hoverMQ = window.matchMedia('(hover: hover) and (min-width: 861px)');
 
   /* ---------- 收藏（只存在這個瀏覽器的 localStorage） ---------- */
   function loadFav() {
@@ -428,6 +523,117 @@
     return '<button class="fav-btn' + (on ? ' on' : '') + '" data-fav="' + id + '" aria-pressed="' + on + '" title="' + (on ? '取消收藏' : '收藏') + '">' + (on ? '★' : '☆') + '</button>';
   }
 
+  /* ---------- 連結面板 ---------- */
+  function panelHTML(c, i) {
+    var body = SECTIONS.map(function (s) {
+      return '<div class="part"><h3>' + s[1] + '</h3>' + renderText(c[s[0]], c.id, '') + '</div>';
+    }).join('');
+    return '<section class="panel" data-idx="' + i + '" data-id="' + c.id + '">' +
+      '<div class="panel-head"><div class="t"><div class="name">' + esc(c.name) + '</div>' +
+      '<div class="en">' + esc(c.en || '') + '</div></div>' +
+      favBtnHTML(c.id) +
+      '<button class="x" data-close="' + i + '" title="關閉">✕</button></div>' +
+      '<div class="panel-meta"><span class="tag">' + esc(c.catName) + '</span>' +
+      '<button class="goto" data-goto="' + c.id + '">在列表中查看</button></div>' +
+      body + '</section>';
+  }
+
+  // 桌面版：算出畫面放得下幾個展開的面板，其餘縮成窄邊
+  function expandedCount(n) {
+    var avail = window.innerWidth - 250;
+    var k = n;
+    while (k > 1 && k * PANEL_W + (n - k) * SPINE_W > avail) k--;
+    return k;
+  }
+
+  function renderStack(focusIdx) {
+    var n = state.stack.length;
+    var el = $('stack');
+    if (!n) {
+      el.classList.remove('open');
+      $('stackShade').classList.remove('open');
+      document.body.classList.remove('sheet-open');
+      $('stackTrack').innerHTML = '';
+      return;
+    }
+    var k = mobileMQ.matches ? n : expandedCount(n);
+    if (focusIdx == null) focusIdx = n - 1;
+    var start = Math.min(state.start, n - k);
+    if (focusIdx < start) start = focusIdx;
+    if (focusIdx > start + k - 1) start = focusIdx - k + 1;
+    state.start = Math.max(0, start);
+    var html = '';
+    state.stack.forEach(function (id, i) {
+      var c = state.byId[id];
+      if (i >= state.start && i < state.start + k) html += panelHTML(c, i);
+      else html += '<button class="spine" data-spine="' + i + '" title="' + esc(c.name) + '">' + Array.from(baseName(c.name)).map(function (ch) { return '<span>' + esc(ch) + '</span>'; }).join('') + '</button>';
+    });
+    $('stackTrack').innerHTML = html;
+    $('stackCrumbs').textContent = state.stack.map(function (id) { return baseName(state.byId[id].name); }).join(' › ');
+    $('stackBack').hidden = n < 2;
+    el.classList.add('open');
+    if (mobileMQ.matches) {
+      $('stackShade').classList.add('open');
+      document.body.classList.add('sheet-open');
+    }
+    var target = $('stackTrack').querySelector('.panel[data-idx="' + focusIdx + '"]');
+    var track = $('stackTrack');
+    if (target) {
+      // 只在面板區塊內左右捲動，不動到整個頁面
+      var l = target.offsetLeft, r = l + target.offsetWidth;
+      if (r > track.scrollLeft + track.clientWidth) track.scrollLeft = r - track.clientWidth;
+      if (l < track.scrollLeft) track.scrollLeft = l;
+    }
+  }
+
+  function flashPanel(i) {
+    var p = $('stackTrack').querySelector('.panel[data-idx="' + i + '"]');
+    if (!p) return;
+    p.classList.remove('flash'); void p.offsetWidth; p.classList.add('flash');
+  }
+
+  // fromIdx：從第幾個面板點出來的；-1 代表從列表點的
+  function openRef(id, fromIdx) {
+    hidePeek();
+    var at = state.stack.indexOf(id);
+    if (at !== -1) { renderStack(at); flashPanel(at); return; }
+    state.stack = state.stack.slice(0, fromIdx + 1).concat(id);
+    state.start = state.stack.length; // 讓最新的面板靠右
+    renderStack(state.stack.length - 1);
+    var p = $('stackTrack').querySelector('.panel[data-idx="' + (state.stack.length - 1) + '"]');
+    if (p) p.scrollTop = 0;
+  }
+
+  function closeStack() { state.stack = []; state.start = 0; renderStack(); }
+
+  /* ---------- 預覽小卡（只在有滑鼠的桌面） ---------- */
+  var peekTimer = null;
+  function hidePeek() { clearTimeout(peekTimer); $('peek').classList.remove('show'); }
+  function showPeek(a) {
+    var c = state.byId[a.getAttribute('data-ref')]; if (!c) return;
+    var pk = $('peek');
+    pk.innerHTML = '<span class="name">' + esc(c.name) + '</span><span class="en">' + esc(c.en || '') + '</span>' +
+      '<div class="g">' + esc(gist(c)) + '</div><div class="hint">點一下在旁邊展開</div>';
+    pk.classList.add('show');
+    var r = a.getBoundingClientRect(), w = pk.offsetWidth, h = pk.offsetHeight;
+    var left = Math.min(Math.max(8, r.left), window.innerWidth - w - 8);
+    var top = r.bottom + 8;
+    if (top + h > window.innerHeight - 8) top = r.top - h - 8;
+    pk.style.left = left + 'px'; pk.style.top = Math.max(8, top) + 'px';
+  }
+  document.addEventListener('mouseover', function (e) {
+    if (!hoverMQ.matches) return;
+    var a = e.target.closest && e.target.closest('a.ref');
+    if (!a) return;
+    clearTimeout(peekTimer);
+    peekTimer = setTimeout(function () { showPeek(a); }, 250);
+  });
+  document.addEventListener('mouseout', function (e) {
+    var a = e.target.closest && e.target.closest('a.ref');
+    if (a && !a.contains(e.relatedTarget)) hidePeek();
+  });
+  window.addEventListener('scroll', hidePeek, true);
+
   function render() {
     var q = state.q.trim();
     var html = '', count = 0;
@@ -526,7 +732,8 @@
     focusCard(c.id);
   });
 
-  $('list').addEventListener('click', function (e) {
+  // 星號與概念連結：列表和面板共用
+  document.addEventListener('click', function (e) {
     var fb = e.target.closest('.fav-btn');
     if (fb) {
       e.preventDefault(); // 不要順便展開或收合卡片
@@ -534,18 +741,50 @@
       if (state.fav.has(id)) state.fav.delete(id); else state.fav.add(id);
       saveFav();
       renderChips();
-      if (state.cat === 'fav' && !state.fav.has(id)) { render(); return; }
-      fb.outerHTML = favBtnHTML(id);
+      document.querySelectorAll('.fav-btn[data-fav="' + id + '"]').forEach(function (b) { b.outerHTML = favBtnHTML(id); });
+      if (state.cat === 'fav' && !state.fav.has(id)) render();
       return;
     }
     var ref = e.target.closest('a.ref');
     if (ref) {
       e.preventDefault();
-      var id = ref.getAttribute('data-ref');
-      history.pushState(null, '', '#' + id);
-      focusCard(id);
+      var panel = ref.closest('.panel');
+      openRef(ref.getAttribute('data-ref'), panel ? +panel.getAttribute('data-idx') : -1);
+    }
+  });
+
+  $('stackTrack').addEventListener('click', function (e) {
+    var x = e.target.closest('[data-close]');
+    if (x) {
+      var i = +x.getAttribute('data-close');
+      state.stack.splice(i, 1);
+      renderStack(Math.min(i, state.stack.length - 1));
       return;
     }
+    var sp = e.target.closest('[data-spine]');
+    if (sp) { var j = +sp.getAttribute('data-spine'); renderStack(j); flashPanel(j); return; }
+    var g = e.target.closest('[data-goto]');
+    if (g) {
+      var id = g.getAttribute('data-goto');
+      closeStack();
+      history.replaceState(null, '', '#' + id);
+      focusCard(id);
+    }
+  });
+  $('stackClose').addEventListener('click', closeStack);
+  $('stackShade').addEventListener('click', closeStack);
+  $('stackBack').addEventListener('click', function () {
+    state.stack.pop();
+    renderStack();
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { hidePeek(); closeStack(); } });
+  var resizeTimer;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () { if (state.stack.length) renderStack(); }, 120);
+  });
+
+  $('list').addEventListener('click', function (e) {
     var cp = e.target.closest('.copy');
     if (cp) {
       var url = location.href.split('#')[0] + '#' + cp.getAttribute('data-copy');

@@ -785,6 +785,9 @@
   });
 
   $('list').addEventListener('click', function (e) {
+    // 在列表中點開另一張卡片時，關掉右側的連結面板
+    var sum = e.target.closest('summary');
+    if (sum && !e.target.closest('.fav-btn') && !sum.parentNode.open) closeStack();
     var cp = e.target.closest('.copy');
     if (cp) {
       var url = location.href.split('#')[0] + '#' + cp.getAttribute('data-copy');
